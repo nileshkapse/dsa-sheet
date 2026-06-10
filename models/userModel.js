@@ -1,45 +1,25 @@
-const fs = require("fs").promises;
-const path = require("path");
+const mongoose = require("mongoose");
 
-const dataFile = path.join(__dirname, "..", "data", "users.json");
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, trim: true },
+  email:    { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
 
-async function readUsers() {
-  try {
-    const json = await fs.readFile(dataFile, "utf8");
-    return JSON.parse(json || "[]");
-  } catch (error) {
-    if (error.code === "ENOENT") {
-      return [];
-    }
-    throw error;
-  }
-}
-
-async function writeUsers(users) {
-  await fs.mkdir(path.dirname(dataFile), { recursive: true });
-  await fs.writeFile(dataFile, JSON.stringify(users, null, 2), "utf8");
-}
+const User = mongoose.model("User", UserSchema);
 
 async function findUserByUsername(username) {
-  const users = await readUsers();
-  return users.find((user) => user.username === username);
+  return User.findOne({ username });
 }
 
 async function findUserByEmail(email) {
-  const users = await readUsers();
-  return users.find((user) => user.email === email);
+  return User.findOne({ email });
 }
 
-async function createUser(user) {
-  const users = await readUsers();
-  users.push(user);
-  await writeUsers(users);
-  return user;
+async function createUser({ username, email, password }) {
+  const user = await User.create({ username, email, password });
+  return { id: user._id.toString(), username: user.username, email: user.email };
 }
 
-module.exports = {
-  readUsers,
-  findUserByUsername,
-  findUserByEmail,
-  createUser,
-};
+module.exports = { User, findUserByUsername, findUserByEmail, createUser };

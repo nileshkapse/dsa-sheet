@@ -3,7 +3,13 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Chapter = require("./models/chapterModel");
 const Problem = require("./models/problemModel");
-const { User } = require("./models/userModel");
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, trim: true },
+  email:    { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/dsadb";
 
