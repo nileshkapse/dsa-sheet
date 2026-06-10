@@ -30,6 +30,7 @@ export default function Dashboard() {
     completionPercentage: 0,
   });
   const navigate = useNavigate();
+  const completedProblems = useProgressStore((state) => state.completedProblems);
 
   const calculateProgressStats = (chaptersData) => {
     const { isCompleted } = useProgressStore.getState();
@@ -90,6 +91,12 @@ export default function Dashboard() {
       navigate("/login");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (filteredChapters.length > 0 || chapters.length > 0) {
+      calculateProgressStats(filteredChapters.length > 0 ? filteredChapters : chapters);
+    }
+  }, [completedProblems]);
 
   useEffect(() => {
     let filtered = chapters;
